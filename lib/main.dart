@@ -1,126 +1,208 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:proyecto2/Ingresos.dart';
+import 'package:proyecto2/MetaAhorro.dart';
 import 'Menu.dart';
+import 'RegistroUsuario.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:proyecto2/LoginGoogle.dart';
 
-void main() => runApp(QuickBee());
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-class QuickBee extends StatelessWidget {
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quick Bee',
-      debugShowCheckedModeBanner: false,
-      // Set Raleway as the default app font
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-      ),
-
-      home: MyHomePage(),
+      title: 'Firebase Auth',
+      home: LoginPage(title: 'Firebase Auth'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  final String title;
+
+  LoginPage({Key key, this.title}) : super(key: key);
+
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0.0, bottom: 150.0),
-                      child: new Text(
-                        "Login",
-                        style: new TextStyle(fontSize: 30.0),
-                      ),
-                    )
-                  ],
+    return Scaffold(
+      resizeToAvoidBottomPadding: false, //evitar error bottom overflowed
+      body: Form(
+        key: _formKey,
+        //autovalidate: _autovalidate,
+        child: Container(
+          //padding: EdgeInsets.all(15.0),
+          child: Stack(
+            children: <Widget>[
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: ExactAssetImage('imagenes/UserMoney.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                new Container(
-                  margin: new EdgeInsets.only(top: 60.0),
-                  height: 120.0,
-                  width: 120.0,
-                  decoration: new BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("imagenes/UserMoney.png"),
-                        fit: BoxFit.cover,
-                      ),
-                  )
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0.0,),
-              child: new TextField(
-                decoration: new InputDecoration(labelText: 'Email'),
               ),
-            ),
-            new SizedBox(
-              height: 15.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0.0),
-              child: new TextField(
-                obscureText: true,
-                decoration: new InputDecoration(labelText: 'Password'),
-              ),
-            ),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 60.0, right: 60.0, top: 50.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => Menu(),
-                        ));
-                      },
-                      child: new Container(
-                          alignment: Alignment.center,
-                          height: 60.0,
-                          decoration: new BoxDecoration(
-                              color: Color(0xFF00695C),
-                              borderRadius: new BorderRadius.circular(9.0)),
-                          child: new Text("Ingresar",
-                              style: new TextStyle(
-                                  fontSize: 20.0, color: Colors.white))),
+              Container(
+                child: new Card(
+                  color: Colors.grey[100],
+                  margin: new EdgeInsets.only(
+                      left: 20.0, right: 20.0, top: 150.0, bottom: 80.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
+                  elevation: 8.0,
+                  child: new Padding(
+                    padding: new EdgeInsets.all(25.0),
+                    child: new Column(
+                      children: <Widget>[
+                        new Container(
+                          child: new TextFormField(
+                            maxLines: 1,
+                            controller: _emailController,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.text,
+                            decoration: new InputDecoration(
+                                labelText: 'Email', icon: Icon(Icons.email)),
+                            onFieldSubmitted: (value) {
+                              //FocusScope.of(context).requestFocus(_phoneFocusNode);
+                            },
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Type your name';
+                              }
+                            },
+                          ),
+                        ),
+                        new Container(
+                          child: new TextFormField(
+                            maxLines: 1,
+                            controller: _passwordController,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.text,
+                            decoration: new InputDecoration(
+                              labelText: 'Contraseña',
+                              icon: Icon(
+                                Icons.vpn_key,
+                                color: Colors.black,
+                              ),
+                            ),
+                            onFieldSubmitted: (value) {
+                              //FocusScope.of(context).requestFocus(_phoneFocusNode);
+                            },
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Escribe la contraseña';
+                              }
+                            },
+                          ),
+                        ),
+                        new Padding(padding: new EdgeInsets.only(top: 30.0)),
+                        new RaisedButton(
+                          color: Colors.blue,
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0)),
+                          padding: new EdgeInsets.all(16.0),
+                          child: new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              new Text(
+                                'Ingresar',
+                                style: new TextStyle(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            signInWithEmail();
+                          },
+                        ),
+                        Divider(),
+                        new RaisedButton(
+                          color: Colors.blue,
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0)),
+                          padding: new EdgeInsets.all(16.0),
+                          child: new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              new Text(
+                                'Ingresar con Google',
+                                style: new TextStyle(
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          onPressed: () => _pushPage(context, SignInDemo()),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 6,
+                              right: 32,
+                            ),
+                            child: InkWell(
+                              onTap: () => _pushPage(context, RegisterPage()),
+                              child: Container(
+                                child: Text(
+                                  'Registrarse',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                )
-              ],
-            ),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        left: 60.0, right: 60.0, top: 10.0),
-                    child: new Container(
-                        alignment: Alignment.center,
-                        height: 60.0,
-                        decoration: new BoxDecoration(
-                            color: Color(0xFFDF513B),
-                            borderRadius: new BorderRadius.circular(9.0)),
-                        child: new Text("Ingresar con Google",
-                            style: new TextStyle(
-                                fontSize: 20.0, color: Colors.white))),
-                  ),
-                )
-              ],
-            )
-          ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  void signInWithEmail() async {
+    //marked async
+    FirebaseUser user;
+    try {
+      user = (await _auth.signInWithEmailAndPassword(
+          email: _emailController.text, password: _passwordController.text)).user;
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      if (user != null) {
+        // sign in successful!
+        _pushPage(context, Menu());
+      } else {
+        // sign in unsuccessful
+        print('No registrado');
+        // ex: prompt the user to try again
+      }
+    }
+  }
+}
+
+void _pushPage(BuildContext context, Widget page) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => page),
+  );
 }
